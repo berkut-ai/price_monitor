@@ -1,0 +1,4 @@
+scraping:
+  website_to_scrape: https://books.toscrape.com
+  amount_of_pages_to_scrape: 50
+  delay: 0.5 # in seconds

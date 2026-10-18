@@ -1,0 +1,30 @@
+{
+  "version": 1.0,
+  "formatters": {
+    "fmt": {
+      "style": "{",
+      "format": "[{levelname}] | {asctime} | {module} | {message}"
+    }
+  },
+  "handlers": {
+    "stream_handler": {
+      "class": "logging.StreamHandler",
+      "formatter": "fmt",
+      "stream": "ext://sys.stdout",
+      "level": "INFO"
+    },
+    "file_handler": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "level": "INFO",
+      "formatter": "fmt",
+      "filename": "",
+      "maxBytes": 5242880,
+      "backupCount": 3,
+      "encoding": "utf-8"
+    }
+  },
+  "root": {
+    "level": "INFO",
+    "handlers": ["stream_handler", "file_handler"]
+  }
+}
