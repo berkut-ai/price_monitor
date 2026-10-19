@@ -2,3 +2,13 @@ scraping:
   website_to_scrape: https://books.toscrape.com
   amount_of_pages_to_scrape: 50
   delay: 0.5 # in seconds
+export:
+  csv:
+    save: yes # yes/no
+    filename: report.csv
+    num_of_files_to_store: 3
+
+  xlsx:
+    save: no # yes/no
+    filename: report.xlsx
+    num_of_files_to_store: 3
