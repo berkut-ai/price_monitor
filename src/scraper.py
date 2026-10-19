@@ -3,13 +3,10 @@ import yaml
 import time
 import requests
 from bs4 import BeautifulSoup
-from logging_settings.logging_setup import setup_logger
 from pathlib import Path
-from urllib.parse import urljoin
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 
-setup_logger()
 
 logger = logging.getLogger(__name__)
 
@@ -17,17 +14,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 RATINGS = {"One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5}
 
 
-with open(BASE_DIR / "config.yaml") as conf_f:
-    config = yaml.safe_load(conf_f)
-    BASE_URL = config["scraping"]["website_to_scrape"]
-    PAGES2SCRAPE = config['scraping']["amount_of_pages_to_scrape"]
-    DELAY = config["scraping"]["delay"]
-
-
-PAGE_URL = BASE_URL + "/catalogue/page-{}.html"
+BASE_URL = ''
+PAGES2SCRAPE = 0
+DELAY = 0
 
 def fetch_page(session: requests.Session, page: int) -> str:
-    response = session.get(PAGE_URL.format(page), timeout=10)
+    response = session.get(BASE_URL + f"/catalogue/page-{page}.html".format(page), timeout=10)
     response.raise_for_status()
     response.encoding = 'utf-8'
 
@@ -62,15 +54,32 @@ def parse_page(html: str) -> list[dict[str, str]]:
             "price": price,
             "availability": "In stock" in availability,
             "rating": RATINGS[rating],
-            "url": urljoin(BASE_URL, link["href"])
+            "url": BASE_URL + '/catalogue/' + link["href"]
         })
 
     return books
 
 
-def scrape_all() -> list[dict[str, str]]:
+def scrape_all(url: str | None = None, pages: int | None = None, delay: float| None  = None) -> list[dict[str, str]] | None:
+    global BASE_URL, PAGES2SCRAPE, DELAY
+
+    BASE_URL = url
+    PAGES2SCRAPE = pages
+    DELAY = delay
+
     all_books = []
-    session = make_session()
+    try:
+        session = make_session()
+    except Exception as err:
+        logger.error("Failed to start a session", exc_info=err)
+        return None
+    if PAGES2SCRAPE < 1:
+        logger.error("Number of pages must be positive")
+        return None
+    if DELAY < 0:
+        logger.error("Delay must be more or equal to 0")
+        return None
+
 
     logger.info(f"Start scraping {PAGES2SCRAPE} pages from URL: {BASE_URL}")
 
